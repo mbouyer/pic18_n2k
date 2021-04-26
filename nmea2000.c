@@ -123,6 +123,7 @@ nmea2000_receive()
 		unsigned char reg;
 		unsigned long pgn;
 		signed char i;
+
 		reg = ECANCON & 0xe0;
 		reg |= (CANCON & 0x0f) | 0x10;
 		ECANCON = reg;
@@ -189,7 +190,8 @@ nmea2000_receive()
 		}
 canack:
 		RXB0CON = 0;
-		// COMSTATbits.NOT_FIFOEMPTY = 0;
+		PIR5bits.RXBnIF = 0;
+
 	}
 	PIE5bits.RXBnIE = 1;
 }
