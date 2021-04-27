@@ -317,8 +317,8 @@ nmea2000_init()
 	CIOCONbits.CLKSEL = 1;
 	CIOCONbits.ENDRHI = 1;
 #if defined(CAN_PORTB)
-	TRISCbits.TRISB3 = 1;
-#elsif defined(CAN_PORTC)
+	TRISBbits.TRISB3 = 1;
+#elif defined(CAN_PORTC)
 	TRISCbits.TRISC7 = 1;
 #else
 #error	"CAN port not defined"
