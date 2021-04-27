@@ -316,7 +316,13 @@ nmea2000_init()
 	CIOCON = 0;
 	CIOCONbits.CLKSEL = 1;
 	CIOCONbits.ENDRHI = 1;
+#if defined(CAN_PORTB)
+	TRISCbits.TRISB3 = 1;
+#elsif defined(CAN_PORTC)
 	TRISCbits.TRISC7 = 1;
+#else
+#error	"CAN port not defined"
+#endif
 
 	/*
 	 * filter 0/mask 0 receives ISO broadcast messages
