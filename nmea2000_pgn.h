@@ -138,7 +138,95 @@ struct nmea2000_datetime_data {
 };
 
 
+/* power-related PGNs */
+#define NMEA2000_DC_STATUS 127506UL
+struct nmea2000_dc_status_data {
+	unsigned char sid;
+	unsigned char instance;
+	unsigned char type;
+#define DCSTAT_TYPE_BATT	0
+#define DCSTAT_TYPE_ALT		1
+#define DCSTAT_TYPE_CONV	2
+#define DCSTAT_TYPE_SOLAR	3
+#define DCSTAT_TYPE_WIND	4
+	unsigned char soc; /* % */
+	unsigned char soh; /* % */
+	unsigned int timeremain; /* minutes */
+	unsigned int ripple; /* V * 100 */
+};
 
+
+#define NMEA2000_CHARGER_STATUS 127507UL
+struct nmea2000_charger_status_data {
+	unsigned char instance;
+	unsigned char batt_instance;
+	unsigned char op_state;
+#define CHARGER_STATE_NOCHRG	0
+#define CHARGER_STATE_BULK	1
+#define CHARGER_STATE_ABS	2
+#define CHARGER_STATE_OVERCHRG	3
+#define CHARGER_STATE_EQ	4
+#define CHARGER_STATE_FLOAT	5
+#define CHARGER_STATE_NOFLOAT	6
+#define CHARGER_STATE_C_VI	7
+#define CHARGER_STATE_DIS	8
+#define CHARGER_STATE_FAULT	9
+	unsigned char mode;
+	unsigned char enable :2;
+	unsigned char eq_pending :2;
+	unsigned char res1 :4;
+	unsigned int eq_time_remain; /* min */
+};
+
+#define NMEA2000_BATTERY_STATUS 127508UL
+struct nmea2000_battery_status_data {
+	unsigned char instance;
+	int voltage; /* volts * 100 */
+	int current; /* A * 10 */
+	unsigned int temp; /* K * 100 */
+	unsigned char sid;
+};
+
+/* environnemental data */
+#define NMEA2000_WIND_DATA 130306UL
+struct nmea2000_wind_data {
+	unsigned char sid;
+	unsigned int speed; /* m/s * 100 */
+	unsigned int dir; /* r * 100 */
+	unsigned char ref;
+#define WIND_REF_TRUE_N	0
+#define WIND_REF_MAGNETIC 1
+#define WIND_REF_APPARENT 2
+#define WIND_REF_TRUE_BOAT 3
+};
+
+#define NMEA2000_ENV_PARAM 130311UL
+struct nmea2000_env_param {
+	unsigned char sid;
+	unsigned char tsource :6;
+#define ENV_TSOURCE_SEA		0
+#define ENV_TSOURCE_OUTSIDE	1
+#define ENV_TSOURCE_INSIDE	2
+#define ENV_TSOURCE_ENGINEROOM	3
+#define ENV_TSOURCE_MAINCABIN	4
+#define ENV_TSOURCE_LIVEWELL	5
+#define ENV_TSOURCE_BAITWELL	6
+#define ENV_TSOURCE_REFRIG	7
+#define ENV_TSOURCE_HEATING	8
+#define ENV_TSOURCE_DEWPOINT	9
+#define ENV_TSOURCE_APPWINDCHILL 10
+#define ENV_TSOURCE_THWINDCHILL	11
+#define ENV_TSOURCE_HEATINDEX	12
+#define ENV_TSOURCE_FREEZER	13
+#define ENV_TSOURCE_EXHAUSTGAS	14
+	unsigned char hsource :2;
+#define ENV_HSOURCE_INSIDE	0
+#define ENV_HSOURCE_OUTSIDE	1
+#define ENV_HSOURCE_UNDEF	2
+	unsigned int temp; /* K * 100 */
+	unsigned int hum; /* % * 250 */
+	unsigned int press; /* Pa */
+};
 
 /*
  * start a recalibration process. The capteur has to be rotating slowly
