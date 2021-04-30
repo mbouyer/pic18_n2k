@@ -242,6 +242,8 @@ nmea2000_send_single_frame(__data struct nmea2000_msg *msg)
 	return 1;
 }
 
+#ifdef NEMA2000_USE_FAST_FRAME
+
 char
 nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 {
@@ -295,7 +297,7 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 	}
 	return 1;
 }
-
+#endif /* NEMA2000_USE_FAST_FRAME */
 
 static char
 nmea2000_send_control(struct nmea2000_msg *msg)
