@@ -27,6 +27,7 @@
  */
 
 #define NMEA2000_DATA_LENGTH	8
+#define NMEA2000_DATA_FASTLENGTH 233
 
 union nmea2000_id {
 	unsigned long id;
@@ -72,6 +73,7 @@ void nmea2000_init(void);
 void nmea2000_poll(unsigned char); /* arg : time in ms */
 void nmea2000_receive(void);
 char nmea2000_send_single_frame(__data struct nmea2000_msg *);
+char nmea2000_send_fast_frame(__data struct nmea2000_msg *, unsigned char);
 void nmea2000_intr(void);
 
 /* user-implemented callback */

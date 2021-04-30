@@ -242,6 +242,61 @@ nmea2000_send_single_frame(__data struct nmea2000_msg *msg)
 	return 1;
 }
 
+char
+nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
+{
+	unsigned char new_tx_queue_prod;
+	struct pic18_can_frame *txq;
+	unsigned char i, j, n;
+	unsigned char len = msg->dlc;
+	const char *data = msg->data;
+
+	if (nmea2000_addr_status != ADDR_STATUS_OK || canbus_mute)
+		return 0;
+
+	for (n  = 0; len > 0; n++) {
+		new_tx_queue_prod = (pix18_tx_queue_prod + 1) & PIC18_TX_QUEUE_MASK;
+
+		if (new_tx_queue_prod == pix18_tx_queue_cons) {
+			/* queue full */
+			return 0;
+		}
+
+		txq = &pix18_tx_queue[pix18_tx_queue_prod];
+		txq->sidh = (msg->id.id >> 21);
+		txq->sidl = ((msg->id.id >> 13) & 0xe0) | _EXIDE | ((msg->id.id >> 16) & 0x3);
+		txq->eidh = (msg->id.id >> 8);
+		txq->eidl = nmea2000_addr;
+		txq->data[0] = (id << 5) | n ;
+		if (n == 0) {
+			txq->data[1] = len;
+			for (i = 0; i < 6; i++)
+				txq->data[i+2] = data[i];
+			len -= 6;
+			data += 6;
+			txq->dlc = 8;
+		} else {
+			j = len;
+			if (j > 7)
+				j = 7;
+			for (i = 0; i < j; i++)
+				txq->data[i+1] = data[i];
+			len -= j;
+			data += j;
+			txq->dlc = j + 1;
+		}
+
+		PIE5bits.TXBnIE = 0;
+		pix18_tx_queue_prod = new_tx_queue_prod;
+		if (TXBIEbits.TXB1IE == 0) {
+			pic18_startxmit_single();
+		}
+		PIE5bits.TXBnIE = 1;
+	}
+	return 1;
+}
+
+
 static char
 nmea2000_send_control(struct nmea2000_msg *msg)
 {
