@@ -160,7 +160,7 @@ struct nmea2000_dc_status_data {
 struct nmea2000_charger_status_data {
 	unsigned char instance;
 	unsigned char batt_instance;
-	unsigned char op_state;
+	unsigned char op_state : 4;
 #define CHARGER_STATE_NOCHRG	0
 #define CHARGER_STATE_BULK	1
 #define CHARGER_STATE_ABS	2
@@ -171,7 +171,9 @@ struct nmea2000_charger_status_data {
 #define CHARGER_STATE_C_VI	7
 #define CHARGER_STATE_DIS	8
 #define CHARGER_STATE_FAULT	9
-	unsigned char mode;
+#define CHARGER_STATE_UNAVAIL	15
+	unsigned char mode : 4;
+#define CHARGER_MODE_STANDALONE	0
 	unsigned char enable :2;
 	unsigned char eq_pending :2;
 	unsigned char res1 :4;
