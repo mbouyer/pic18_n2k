@@ -28,6 +28,12 @@
 
 #include <stdlib.h>
 
+#if defined(__GNUC__)
+#define __packed __attribute__((__packed__))
+#else
+#define __packed /**/
+#endif
+
 #define NMEA2000_PRIORITY_HIGH		0
 #define NMEA2000_PRIORITY_SECURITY	1
 #define NMEA2000_PRIORITY_CONTROL	3
@@ -50,18 +56,18 @@
 
 /* request for a PGN */
 #define ISO_REQUEST 59904UL
-struct iso_request_data {
+struct __packed iso_request_data {
         uint32_t pgn;
 };
 
 #define ISO_ADDRESS_CLAIM 60928UL
-struct iso_address_claim_data {
+struct __packed iso_address_claim_data {
 	uint8_t name[NMEA2000_DATA_LENGTH];
 };
 
 /* capteur-related PGNs */
 #define NMEA2000_ATTITUDE 127257UL
-struct nmea2000_attitude_data {
+struct __packed nmea2000_attitude_data {
 	uint8_t sid;
 	int16_t yaw;	// rad * 10000
 	int16_t pitch;	// rad * 10000
@@ -69,13 +75,13 @@ struct nmea2000_attitude_data {
 };
 
 #define NMEA2000_RATEOFTURN 127251UL
-struct nmea2000_rateofturn_data {
+struct __packed nmea2000_rateofturn_data {
 	uint8_t sid;
 	int32_t rate;	// rad/s * 1000 * 10000
 };
 
 #define NMEA2000_RUDDER	127245UL
-struct nmea2000_rudder_data {
+struct __packed nmea2000_rudder_data {
 	uint8_t instance;
 	uint8_t dir_order; // set to 0xf8
 #define DIR_ORDER_NONE 0xf8
@@ -89,13 +95,13 @@ struct nmea2000_rudder_data {
 /* GPS-related PGNs */
 
 #define NMEA2000_LATLONG 129025UL
-struct nmea2000_latlong_data {
+struct __packed nmea2000_latlong_data {
 	int32_t latitude; /* deg * 10000000 */
 	int32_t longitude; /* deg * 10000000 */
 };
 	
 #define NMEA2000_COGSOG 129026UL
-struct nmea2000_cogsog_data {
+struct __packed nmea2000_cogsog_data {
 	uint8_t  sid;
 	uint8_t  cogref	: 2;
 	uint8_t  res	: 6;
@@ -105,7 +111,7 @@ struct nmea2000_cogsog_data {
 };
 
 #define NMEA2000_XTE 129283UL
-struct nmea2000_xte_data {
+struct __packed nmea2000_xte_data {
 	uint8_t sid;
 	uint8_t mode	: 4;
 	uint8_t res	: 2;
@@ -114,7 +120,7 @@ struct nmea2000_xte_data {
 };
 
 #define NMEA2000_NAVDATA 129284UL
-struct nmea2000_navdata_data {
+struct __packed nmea2000_navdata_data {
 	uint8_t  sid;
 	uint32_t dist_to_wp; /* m * 100 */
 	uint8_t  ref	: 2; /* 0 = true; 1 = magn */
@@ -133,7 +139,7 @@ struct nmea2000_navdata_data {
 };
 
 #define NMEA2000_DATETIME 129033UL
-struct nmea2000_datetime_data {
+struct __packed nmea2000_datetime_data {
 	uint16_t date; /* days since Jan 1, 1970 */
 	uint32_t time; /* seconds since 00:00 * 10000 */
 	int16_t  local_offset; /* minutes */
@@ -142,7 +148,7 @@ struct nmea2000_datetime_data {
 
 /* power-related PGNs */
 #define NMEA2000_DC_STATUS 127506UL
-struct nmea2000_dc_status_data {
+struct __packed nmea2000_dc_status_data {
 	uint8_t sid;
 	uint8_t instance;
 	uint8_t type;
@@ -159,7 +165,7 @@ struct nmea2000_dc_status_data {
 
 
 #define NMEA2000_CHARGER_STATUS 127507UL
-struct nmea2000_charger_status_data {
+struct __packed nmea2000_charger_status_data {
 	uint8_t  instance;
 	uint8_t  batt_instance;
 	uint8_t  op_state : 4;
@@ -183,7 +189,7 @@ struct nmea2000_charger_status_data {
 };
 
 #define NMEA2000_BATTERY_STATUS 127508UL
-struct nmea2000_battery_status_data {
+struct __packed nmea2000_battery_status_data {
 	uint8_t  instance;
 	int16_t  voltage; /* volts * 100 */
 	int16_t  current; /* A * 10 */
@@ -193,7 +199,7 @@ struct nmea2000_battery_status_data {
 
 /* environnemental data */
 #define NMEA2000_WIND_DATA 130306UL
-struct nmea2000_wind_data {
+struct __packed nmea2000_wind_data {
 	uint8_t  sid;
 	uint16_t speed; /* m/s * 100 */
 	uint16_t dir; /* r * 100 */
@@ -205,7 +211,7 @@ struct nmea2000_wind_data {
 };
 
 #define NMEA2000_ENV_PARAM 130311UL
-struct nmea2000_env_param {
+struct __packed nmea2000_env_param {
 	uint8_t sid;
 	uint8_t tsource :6;
 #define ENV_TSOURCE_SEA		0
@@ -243,7 +249,7 @@ struct nmea2000_env_param {
  * transmit compass offset 
  */
 #define PRIVATE_COMPASS_OFFSET 25856UL
-struct private_compass_offset_data {
+struct __packed private_compass_offset_data {
 	int16_t offset; /* rad * 10000 */
 };
 
@@ -253,7 +259,7 @@ struct private_compass_offset_data {
  * priodic transmit of command status
  */
 #define PRIVATE_COMMAND_STATUS 61846UL
-struct private_command_status {
+struct __packed private_command_status {
 	int16_t heading; /* heading to follow, rad * 10000 */
 	union command_errors {
 		struct err_bits {
@@ -276,14 +282,14 @@ struct private_command_status {
  * direct command of acuator
  */
 #define PRIVATE_COMMAND_ACUATOR 38400UL
-struct private_command_acuator {
+struct __packed private_command_acuator {
 	int8_t	move; /* how much to move */
 };
 /*
  * ask command to go on or off auto mode
  */
 #define PRIVATE_COMMAND_ENGAGE 38656UL
-struct private_command_engage {
+struct __packed private_command_engage {
 	int16_t heading; /* heading to follow, rad * 1000 */
 	uint8_t auto_mode; /* see private_command_status */
 	uint8_t params_slot; /* which slot parameters to use */
@@ -292,7 +298,7 @@ struct private_command_engage {
  * ack error to command
  */
 #define PRIVATE_COMMAND_ERRACK 38912UL
-struct private_command_errack {
+struct __packed private_command_errack {
 	union command_errors ack_errors;
 };
 
@@ -301,7 +307,7 @@ struct private_command_errack {
  * used both to retrieve it from command, or to write a new one to command.
  */
 #define PRIVATE_COMMAND_FACTORS 39168UL
-struct private_command_factors {
+struct __packed private_command_factors {
 	int8_t  slot;
 	int16_t factors[3];
 #define FACTOR_ERR  0
@@ -312,13 +318,13 @@ struct private_command_factors {
  * request a command parameter factors slot.
  */
 #define PRIVATE_COMMAND_FACTORS_REQUEST 39424UL
-struct private_command_factors_request {
+struct __packed private_command_factors_request {
 	int8_t slot;
 };
 
 /* general, private PGNs */
 #define PRIVATE_REMOTE_CONTROL 39680UL
-struct private_remote_control {
+struct __packed private_remote_control {
 	int8_t control_type;
 	int8_t control_subtype;
 	int8_t control_data[6]; /* actually variable type-dependant lenght */
