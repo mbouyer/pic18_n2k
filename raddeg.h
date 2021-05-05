@@ -29,3 +29,4 @@
 int rad2deg(int);
 int urad2deg(unsigned int);
 int deg2rad(int);
+unsigned int deg2urad(int);

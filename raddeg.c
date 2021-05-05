@@ -57,3 +57,12 @@ deg2rad(int deg)
 	rad = (float)(deg) * 174.53293F;
 	return (int)(rad + 1);
 }
+
+unsigned int
+deg2urad(int deg)
+{
+	float rad;
+
+	rad = (float)(deg) * 174.53293F;
+	return (unsigned int)(rad + 1);
+}
