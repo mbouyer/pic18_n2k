@@ -238,6 +238,14 @@ struct __packed nmea2000_env_param {
 	uint16_t press; /* Pa */
 };
 
+/* private: send rain counter */
+#define PRIVATE_RAIN_COUNTER 61847UL
+struct __packed private_rain_counter {
+	uint8_t sid;
+	uint16_t count;
+};
+
+/* autopilot private PGNs */
 /*
  * start a recalibration process. The capteur has to be rotating slowly
  * (not more than 5 deg/s) around z.
