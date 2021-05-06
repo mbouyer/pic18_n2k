@@ -202,7 +202,7 @@ struct __packed nmea2000_battery_status_data {
 struct __packed nmea2000_wind_data {
 	uint8_t  sid;
 	uint16_t speed; /* m/s * 100 */
-	uint16_t dir; /* r * 100 */
+	uint16_t dir; /* r * 10000 */
 	uint8_t  ref;
 #define WIND_REF_TRUE_N	0
 #define WIND_REF_MAGNETIC 1
