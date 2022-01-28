@@ -241,7 +241,7 @@ pic18can_init(void) {
 	 * filter 0 receives ISO broadcast messages
 	 * 0xf000 <= PFN <= 0xffff
 	 */
-	C1MASK0L = 0x3c; /* sid 7-0 */
+	C1MASK0L = 0xbc; /* sid 7-0 */
 	C1MASK0H = 0; /* sid 8-10, eid 4-0 */
 	C1MASK0U = 0; /* eid 5-12 */
 	C1MASK0T = _C1FLTOBJ0T_EXIDE_MASK; /* also eid 13 - 17 */
@@ -254,7 +254,7 @@ pic18can_init(void) {
 	 * filter 1 receives N2K broadcast messages
 	 * PFN >= 0x10000
 	 */
-	C1MASK1L = 0x40; /* sid 7-0 */
+	C1MASK1L = 0xc0; /* sid 7-0 */
 	C1MASK1H = 0; /* sid 8-10, eid 4-0 */
 	C1MASK1U = 0; /* eid 5-12 */
 	C1MASK1T = _C1FLTOBJ0T_EXIDE_MASK; /* also eid 13 - 17 */
@@ -264,7 +264,7 @@ pic18can_init(void) {
 	C1FLTOBJ1T = _C1FLTOBJ0T_EXIDE_MASK; /* also eid 13 - 17 */
 
 	/* filter 2 receives messages addressed to global address */
-	C1MASK2L = 0; /* sid 7-0 */
+	C1MASK2L = 0x80; /* sid 7-0 */
 	C1MASK2H = 0; /* sid 8-10, eid 4-0 */
 	C1MASK2U = 0xf8; /* eid 5-12 */
 	C1MASK2T = _C1FLTOBJ0T_EXIDE_MASK | 0x07; /* also eid 13 - 17 */
@@ -278,7 +278,7 @@ pic18can_init(void) {
 	 * For now set to NMEA2000_ADDR_GLOBAL, will change when
 	 * claim_address completes.
 	 */
-	C1MASK3L = 0; /* sid 7-0 */
+	C1MASK3L = 0x80; /* sid 7-0 */
 	C1MASK3H = 0; /* sid 8-10, eid 4-0 */
 	C1MASK3U = 0xf8; /* eid 5-12 */
 	C1MASK3T = _C1FLTOBJ0T_EXIDE_MASK | 0x07; /* also eid 13 - 17 */
