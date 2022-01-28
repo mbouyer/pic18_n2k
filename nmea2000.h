@@ -26,6 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __18F27Q84
+#define PIC_ECAN
+#endif
+
+#ifdef __XC
+#define __data __ram
+#endif
+
 #define NMEA2000_DATA_LENGTH	8
 #define NMEA2000_DATA_FASTLENGTH 233
 
@@ -66,8 +74,13 @@ extern unsigned char nmea2000_addr_status;
 extern unsigned char canbus_mute;
 
 extern union nmea2000_id rid;
+#ifndef PIC_ECAN
 #define rdata ((unsigned char *)&RXB0D0)
 #define rdlc RXB0DLC
+#else
+extern unsigned char *rdata;
+extern unsigned char rdlc;
+#endif /* PIC_ECAN */
 
 void nmea2000_init(void);
 void nmea2000_poll(unsigned char); /* arg : time in ms */

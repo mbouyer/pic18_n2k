@@ -26,6 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __XC
+#include <xc.h>
+#endif
+
 #include "nmea2000.h"
 #include "nmea2000_pgn.h"
 #include "nmea2000_user.h"
@@ -41,7 +45,11 @@ static struct iso_address_claim_data address_claim_data;
 static void nmea2000_claimaddr(unsigned char, unsigned char);
 static inline void nmea2000_do_receive(void);
 
+#ifdef PIC_ECAN
+#include "nmea2000_pic18_ecan.c"
+#else
 #include "nmea2000_pic18_can.c"
+#endif
 
 static inline void
 nmea2000_do_receive(void)
