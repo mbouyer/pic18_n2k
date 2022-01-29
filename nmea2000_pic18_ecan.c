@@ -44,6 +44,8 @@
 
 static unsigned char ecanfifo[EFIFO_SIZE] __at(CANRAMBASE);
 
+static uint16_t nmea2000_xmit_date; 
+
 static inline void
 pic18can_config_mode(void)
 {
@@ -106,11 +108,12 @@ nmea2000_send_single_frame(__data struct nmea2000_msg *msg)
 	unsigned char *fifo;
 	fifo = (unsigned char *)(C1FIFOUA2L | (C1FIFOUA2H << 8));
 
-	if (nmea2000_addr_status != ADDR_STATUS_OK || canbus_mute)
+	if (nmea2000_status != NMEA2000_S_OK || canbus_mute)
 		return 0;
 
-	if (C1FIFOSTA2Lbits.TFNRFNIF == 0)
+	if (C1FIFOSTA2Lbits.TFNRFNIF == 0) {
 		return 0;
+	}
 
 	fifo[0] = (msg->id.id >> 18) & 0xff;
 	fifo[1] = ((msg->id.id >> 26) & 0x7) | ((nmea2000_addr << 3) & 0xf8);
@@ -122,6 +125,7 @@ nmea2000_send_single_frame(__data struct nmea2000_msg *msg)
 		fifo[i + 8] = msg->data[i];
 
 	C1FIFOCON2H = 0x3; /* set UNC and TXREQ */
+	nmea2000_xmit_date = 0;
 	return 1;
 }
 
@@ -136,7 +140,7 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 	unsigned char *fifo;
 	fifo = (unsigned char *)(C1FIFOUA3L | (C1FIFOUA3H << 8));
 
-	if (nmea2000_addr_status != ADDR_STATUS_OK || canbus_mute)
+	if (nmea2000_status != NMEA2000_S_OK || canbus_mute)
 		return 0;
 
 	for (n  = 0; len > 0; n++) {
@@ -170,6 +174,7 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 		}
 		C1FIFOCON3H = 0x3; /* set UNC and TXREQ */
 	}
+	nmea2000_xmit_date = 0;
 	return 1;
 }
 #endif /* NEMA2000_USE_FAST_FRAME */
@@ -193,7 +198,69 @@ nmea2000_send_control(struct nmea2000_msg *msg)
 		fifo[i + 8] = msg->data[i];
 
 	C1TXQCONH = 0x3; /* set UNC and TXREQ */
+	nmea2000_xmit_date = 0;
 	return 1;
+}
+
+static inline void
+pic18can_poll(unsigned char time)
+{
+	switch(nmea2000_status) {
+	case NMEA2000_S_OK:
+		/* check transmit fifos for errors. If any, reset */
+		if (C1TXQSTALbits.TXERR ||
+		    C1FIFOSTA2Lbits.TXERR ||
+		    C1FIFOSTA3Lbits.TXERR)
+			goto abort;
+
+		if (C1TXQCONHbits.TXREQ == 0 &&
+		    C1FIFOCON2Hbits.TXREQ == 0 &&
+		    C1FIFOCON3Hbits.TXREQ == 0) {
+			/* no transmit pending */
+			return;
+		}
+
+		nmea2000_xmit_date += time;
+		if (nmea2000_xmit_date < 1000) {
+			/* no timeout yet */
+			return;
+		}
+abort:
+		C1TXQCONHbits.TXREQ = 0;
+		C1FIFOCON2Hbits.TXREQ = 0;
+		C1FIFOCON3Hbits.TXREQ = 0;
+		nmea2000_status = NMEA2000_S_ABORT;
+		pic18can_set_filter(NMEA2000_ADDR_GLOBAL);
+		/* FALLTRHOUGH */
+	case NMEA2000_S_ABORT:
+		if (C1TXQCONHbits.TXREQ ||
+		    C1FIFOCON2Hbits.TXREQ ||
+		    C1FIFOCON3Hbits.TXREQ) {
+			/* still aborting transmits, wait */
+			return;
+		}
+		C1TXQCONHbits.FRESET = 1;
+		C1FIFOCON2Hbits.FRESET = 1;
+		C1FIFOCON3Hbits.FRESET = 1;
+		nmea2000_status = NMEA2000_S_RESET;
+		/* FALLTRHOUGH */
+	case NMEA2000_S_RESET:
+		if (C1TXQCONHbits.FRESET ||
+		    C1FIFOCON2Hbits.FRESET ||
+		    C1FIFOCON3Hbits.FRESET) {
+			return;
+		}
+		nmea2000_status = NMEA2000_S_IDLE;
+		break;
+	case NMEA2000_S_IDLE:
+		break;
+	case NMEA2000_S_CLAIMING:
+		if (C1TXQSTALbits.TXQEIF == 0) {
+			/* claim packet not sent yet */
+			nmea2000_claim_date = 0;
+		}
+		break;
+	}
 }
 
 static inline void

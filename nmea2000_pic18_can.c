@@ -146,7 +146,7 @@ nmea2000_send_single_frame(__data struct nmea2000_msg *msg)
 	unsigned char new_tx_queue_prod;
 	struct pic18_can_frame *txq;
 
-	if (nmea2000_addr_status != ADDR_STATUS_OK || canbus_mute)
+	if (nmea2000_status != NMEA2000_S_OK || canbus_mute)
 		return 0;
 
 	new_tx_queue_prod = (pix18_tx_queue_prod + 1) & PIC18_TX_QUEUE_MASK;
@@ -185,7 +185,7 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 	unsigned char len = msg->dlc;
 	const char *data = msg->data;
 
-	if (nmea2000_addr_status != ADDR_STATUS_OK || canbus_mute)
+	if (nmea2000_status != NMEA2000_S_OK || canbus_mute)
 		return 0;
 
 	for (n  = 0; len > 0; n++) {
@@ -250,6 +250,29 @@ nmea2000_send_control(struct nmea2000_msg *msg)
 
 	TXB2CONbits.TXREQ = 1;
 	return 1;
+}
+
+static inline void
+pic18can_poll(unsigned char time)
+{
+	(void)time;
+        switch(nmea2000_status) { 
+	case NMEA2000_S_OK:
+		/* XXX check transmit */
+		return;
+	case NMEA2000_S_ABORT:
+	case NMEA2000_S_RESET:
+		nmea2000_status = NMEA2000_S_IDLE;
+		return;
+	case NMEA2000_S_CLAIMING:
+		if (TXB2CONbits.TXREQ != 0) {
+			/* claim packet not sent yet */
+			nmea2000_claim_date = 0;
+		}
+		return;
+	default:
+		break;
+	}
 }
 
 static inline void

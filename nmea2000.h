@@ -67,10 +67,16 @@ struct nmea2000_msg_storage {
 };
 
 extern unsigned char nmea2000_addr;
-extern unsigned char nmea2000_addr_status; 
-#define ADDR_STATUS_INVALID 0
-#define ADDR_STATUS_CLAIMING 1
-#define ADDR_STATUS_OK 2
+
+typedef enum {
+	NMEA2000_S_OK = 0,
+	NMEA2000_S_ABORT,
+	NMEA2000_S_RESET,
+	NMEA2000_S_IDLE,
+	NMEA2000_S_CLAIMING,
+} nmea2000_status_t;
+extern nmea2000_status_t nmea2000_status; 
+
 extern unsigned char canbus_mute;
 
 extern union nmea2000_id rid;
