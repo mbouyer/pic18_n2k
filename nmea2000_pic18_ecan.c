@@ -210,8 +210,9 @@ pic18can_poll(unsigned char time)
 		/* check transmit fifos for errors. If any, reset */
 		if (C1TXQSTALbits.TXERR ||
 		    C1FIFOSTA2Lbits.TXERR ||
-		    C1FIFOSTA3Lbits.TXERR)
+		    C1FIFOSTA3Lbits.TXERR) {
 			goto abort;
+		}
 
 		if (C1TXQCONHbits.TXREQ == 0 &&
 		    C1FIFOCON2Hbits.TXREQ == 0 &&
@@ -255,7 +256,10 @@ abort:
 	case NMEA2000_S_IDLE:
 		break;
 	case NMEA2000_S_CLAIMING:
-		if (C1TXQSTALbits.TXQEIF == 0) {
+		if (C1TXQSTALbits.TXERR) {
+			goto abort;
+		}
+		if (C1TXQSTALbits.TXQEIF == 0 || C1TXQCONHbits.TXREQ) {
 			/* claim packet not sent yet */
 			nmea2000_claim_date = 0;
 		}
