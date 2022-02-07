@@ -98,3 +98,9 @@ void nmea2000_intr(void);
 /* user-implemented callback */
 void user_handle_iso_request(unsigned long);
 void user_receive(void);
+
+#define SIDINC(s) { \
+	s++; \
+	if (s == 0xfe) \
+		s = 0;\
+	}
