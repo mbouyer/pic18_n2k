@@ -159,11 +159,11 @@ nmea2000_poll(unsigned char time)
 		break;
 
 	case NMEA2000_S_CLAIMING:
-		nmea2000_claim_date += time;
-		if (nmea2000_claim_date >= 250) {
+		if (250 - nmea2000_claim_date < time) {
 			nmea2000_status = NMEA2000_S_OK;
 			pic18can_set_filter(nmea2000_addr);
 		}
+		nmea2000_claim_date += time;
 		break;
 	default:
 		break;
