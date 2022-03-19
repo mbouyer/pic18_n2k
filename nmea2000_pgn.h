@@ -235,7 +235,7 @@ struct __packed nmea2000_env_param {
 #define ENV_HSOURCE_UNDEF	2
 	uint16_t temp; /* K * 100 */
 	uint16_t hum; /* % * 250 */
-	uint16_t press; /* Pa */
+	uint16_t press; /* hPa */
 };
 
 /* private: send rain counter */
