@@ -68,7 +68,7 @@ pic18can_set_filter(unsigned char addr)
 	C1FLTCON0T = 0;
 	C1FLTOBJ3L = 0; /* sid 7-0 */
 	C1FLTOBJ3H = 0; /* sid 8-10, eid 4-0 */
-	C1FLTOBJ3U = (addr << 3) & 0xe0; /* eid 5-12 */
+	C1FLTOBJ3U = (addr << 3) & 0xf8; /* eid 5-12 */
 	C1FLTOBJ3T = _C1FLTOBJ0T_EXIDE_MASK |
 	    ((addr >> 5) & 0x1f); /* also eid 13 - 17 */
 	C1FLTCON0T = 0x81;
