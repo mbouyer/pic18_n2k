@@ -360,3 +360,40 @@ struct __packed private_remote_control {
 #define CONTROL_REMOTE_DISPLAY	0x06
 #define CONTROL_REMOTE_DISPLAY_PAGE	0x00
 #define CONTROL_REMOTE_DISPLAY_PAGE_SIZE 3
+
+/* log management (fast frame ) */
+#define PRIVATE_LOG	39936UL
+#define PRIVATE_LOG_REQUEST_FIRST 0
+#define PRIVATE_LOG_REQUEST_NEXT 1
+#define PRIVATE_LOG_REQUEST 2
+#define PRIVATE_LOG_RESET   9
+#define PRIVATE_LOG_REPLY   10
+#define PRIVATE_LOG_ERROR   11
+
+struct __packed private_log_request {
+	uint8_t	cmd; /* PRIVATE_LOG_REQUEST */
+	uint8_t	sid; /* copied to reply */
+	uint16_t idx; /* log index request (e.g. page) */
+};
+
+struct __packed private_log_reply {
+	uint8_t	cmd; /* PRIVATE_LOG_REPLY */
+	uint8_t	sid; /* copied from request */
+	uint16_t idx; /* log index of this data (e.g. page) */
+	uint8_t data[0]; /* variable len */
+};
+
+struct __packed private_log_error {
+	uint8_t	cmd; /* PRIVATE_LOG_ERROR */
+	uint8_t	sid; /* copied from request */
+	uint8_t error;
+#define PRIVATE_LOG_ERROR_NOTFOUND 0
+#define PRIVATE_LOG_ERROR_LAST 1
+};
+
+struct __packed private_log_reset {
+	uint8_t	cmd; /* PRIVATE_LOG_RESET */
+	uint8_t	sid;
+	uint16_t magic; 
+#define PRIVATE_LOG_RESET_MAGIC	0x18e1
+};
