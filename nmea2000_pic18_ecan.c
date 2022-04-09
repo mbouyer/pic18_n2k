@@ -138,12 +138,12 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 	unsigned char len = msg->dlc;
 	unsigned char *data = msg->data;
 	unsigned char *fifo;
-	fifo = (unsigned char *)(C1FIFOUA3L | (C1FIFOUA3H << 8));
 
 	if (nmea2000_status != NMEA2000_S_OK || canbus_mute)
 		return 0;
 
 	for (n  = 0; len > 0; n++) {
+		fifo = (unsigned char *)(C1FIFOUA3L | (C1FIFOUA3H << 8));
 		if (C1FIFOSTA3Lbits.TFNRFNIF == 0)
 			return 0;
 
@@ -157,11 +157,14 @@ nmea2000_send_fast_frame(__data struct nmea2000_msg *msg, unsigned char id)
 		fifo[8] = ((id << 5) & 0xe) | n ;
 		if (n == 0) {
 			fifo[9] = len;
-			for (i = 0; i < 6; i++)
+			j = len;
+			if (j > 6)
+				j = 6;
+			for (i = 0; i < j; i++)
 				fifo[i+10] = data[i];
-			len -= 6;
-			data += 6;
-			fifo[4] = 8 | 0x10;
+			len -= j;
+			data += j;
+			fifo[4] = (j + 2) | 0x10;
 		} else {
 			j = len;
 			if (j > 7)
