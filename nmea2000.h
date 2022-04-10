@@ -35,7 +35,7 @@
 #endif
 
 #define NMEA2000_DATA_LENGTH	8
-#define NMEA2000_DATA_FASTLENGTH 233
+#define NMEA2000_DATA_FASTLENGTH 223
 
 union nmea2000_id {
 	unsigned long id;
