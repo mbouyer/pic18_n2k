@@ -274,6 +274,7 @@ static inline void
 pic18can_init(void) {
 	pic18can_config_mode();
 
+	C1CONTbits.TXBWS = 4; /* transmit bw sharing = 16 arb bits */
 	C1CONU = 0x10; /* TXQ en, STEF disable */
 	C1CONH = 0x90; /* enable CAN, BRSDIS */
 	C1CONL = 0x40; /* PXEDIS */
