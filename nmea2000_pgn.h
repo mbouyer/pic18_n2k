@@ -147,6 +147,18 @@ struct __packed nmea2000_datetime_data {
 
 
 /* power-related PGNs */
+#define NMEA2000_LOAD_CONTROLLER_STATE 127500UL
+struct __packed nmea2000_load_controller_data {
+	uint8_t sid,
+	uint8_t conn, /* connection id */
+	uint8_t state, 
+	uint8_t status, 
+	uint8_t op_status, 
+	uint8_t pwm_duty, 
+	uint8_t ton, 
+	uint8_t toff, 
+};
+
 #define NMEA2000_DC_STATUS 127506UL
 struct __packed nmea2000_dc_status_data {
 	uint8_t sid;
@@ -195,6 +207,15 @@ struct __packed nmea2000_battery_status_data {
 	int16_t  current; /* A * 10 */
 	uint16_t temp; /* K * 100 */
 	uint8_t  sid;
+};
+
+#define NMEA2000_DC_VOLTAGE_CURRENT 127751UL
+struct __packed nmea2000_dc_voltage_current_data {
+	uint8_t  sid;
+	uint8_t  conn; /* connection number */
+	uint16_t  voltage; /* volts * 100 */
+	int8_t  current[3]; /* signed 24 bits, A * 100 */
+	uint8_t  reserved;
 };
 
 /* environnemental data */
