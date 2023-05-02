@@ -151,7 +151,7 @@ struct __packed nmea2000_datetime_data {
 struct __packed nmea2000_load_controller_data {
 	uint8_t sid;
 	uint8_t conn; /* connection id */
-	uint8_t state; 
+	uint8_t state; /* no info on what state, status and op_status means */
 	uint8_t status; 
 	uint8_t op_status; 
 	uint8_t pwm_duty;
@@ -257,6 +257,16 @@ struct __packed nmea2000_env_param {
 	uint16_t temp; /* K * 100 */
 	uint16_t hum; /* % * 250 */
 	uint16_t press; /* hPa */
+};
+
+
+#define NMEA2000_TEMP 130316UL
+struct __packed nmea2000_temp {
+	uint8_t sid;
+	uint8_t instance;
+	uint8_t source; /* see  nmea2000_env_param */
+	uint8_t  temp[3]; /* unsigned 24 bits, K * 1000 */
+	uint16_t settemp; /* K * 10 */
 };
 
 /* private: send rain counter */
