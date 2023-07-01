@@ -130,8 +130,6 @@ nmea2000_do_receive()
 				return 1;
 			}
 			/* FALLTHROUGH */
-		default:
-			break;
 		}
 		msg.n2k_id = f.n2kf_id;
 		msg.n2k_dlc = f.n2kf_dlc;
