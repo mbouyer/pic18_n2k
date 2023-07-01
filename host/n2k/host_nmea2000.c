@@ -117,7 +117,7 @@ nmea2000_do_receive()
 				msg.n2k_data = &f.n2kf_data[0];
 				user_handle_iso_request(pgn, &msg);
 			}
-			break;
+			return 1;
 		case (PRIVATE_REMOTE_CONTROL >> 8):
 			if (f.n2kf_data[0] == CONTROL_RESET &&
 			    f.n2kf_dlc == CONTROL_RESET_SIZE) {
@@ -127,15 +127,16 @@ nmea2000_do_receive()
 			} else if (f.n2kf_data[0] == CONTROL_MUTE &&
 			    f.n2kf_dlc == CONTROL_MUTE_SIZE) {
 				canbus_mute = f.n2kf_data[1] & 0x1;
-				break;
+				return 1;
 			}
 			/* FALLTHROUGH */
 		default:
-			msg.n2k_id = f.n2kf_id;
-			msg.n2k_dlc = f.n2kf_dlc;
-			msg.n2k_data = &f.n2kf_data[0];
-			user_receive(&msg);
+			break;
 		}
+		msg.n2k_id = f.n2kf_id;
+		msg.n2k_dlc = f.n2kf_dlc;
+		msg.n2k_data = &f.n2kf_data[0];
+		user_receive(&msg);
 	} else {
 		msg.n2k_id = f.n2kf_id;
 		msg.n2k_dlc = f.n2kf_dlc;
