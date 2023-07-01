@@ -45,6 +45,9 @@ static struct iso_address_claim_data address_claim_data;
 static void nmea2000_claimaddr(unsigned char, unsigned char);
 static inline void nmea2000_do_receive(void);
 
+#ifdef N2K_PRINTF
+#include "nmea2000_printf.c"
+#endif
 #ifdef PIC_ECAN
 #include "nmea2000_pic18_ecan.c"
 #else
@@ -105,6 +108,11 @@ nmea2000_do_receive(void)
 				canbus_mute = rdata[1] & 0x1;
 				break;
 			}
+#ifdef N2K_PRINTF
+			else if (rdata[0] == CONTROL_PRINTF) {
+				nema2000_printf_control();
+			}
+#endif /* N2K_PRINTF */
 			/* FALLTHROUGH */
 		default:
 			user_receive();
@@ -162,10 +170,16 @@ nmea2000_poll(unsigned char time)
 		if (250 - nmea2000_claim_date < time) {
 			nmea2000_status = NMEA2000_S_OK;
 			pic18can_set_filter(nmea2000_addr);
+#ifdef N2K_PRINTF
+			nema2000_printf_adv();
+#endif
 		}
 		nmea2000_claim_date += time;
 		break;
 	default:
+#ifdef N2K_PRINTF
+		nema2000_printf_poll();
+#endif
 		break;
 	}
 }
@@ -174,6 +188,9 @@ void
 nmea2000_init()
 {
 	pic18can_init();
+#ifdef N2K_PRINTF
+	nema2000_printf_init();
+#endif
 	nmea2000_status = NMEA2000_S_ABORT;
 	nmea2000_addr = NMEA2000_ADDR_NULL;
 	canbus_mute = 0;

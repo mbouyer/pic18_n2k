@@ -391,6 +391,11 @@ struct __packed private_remote_control {
 #define CONTROL_REMOTE_DISPLAY	0x06
 #define CONTROL_REMOTE_DISPLAY_PAGE	0x00
 #define CONTROL_REMOTE_DISPLAY_PAGE_SIZE 3
+#define CONTROL_PRINTF	0x07
+#define CONTROL_PRINTF_ON 0x01
+#define CONTROL_PRINTF_ON_SIZE 2
+#define CONTROL_PRINTF_ADV 0x02
+#define CONTROL_PRINTF_ADV_SIZE 5
 
 /* log management (fast frame ) */
 #define PRIVATE_LOG	39936UL
@@ -428,3 +433,6 @@ struct __packed private_log_reset {
 	uint16_t magic; 
 #define PRIVATE_LOG_RESET_MAGIC	0x18e1
 };
+
+/* printf data */
+#define PRIVATE_PRINTF_DATA 40192UL

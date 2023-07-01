@@ -99,6 +99,11 @@ void nmea2000_intr(void);
 void user_handle_iso_request(unsigned long);
 void user_receive(void);
 
+void nmea2000_putchar(char c);
+void nema2000_printf_control(void);
+void nema2000_printf_init(void);
+void nema2000_printf_adv(void);
+
 #define SIDINC(s) { \
 	s++; \
 	if (s == 0xfe) \
