@@ -31,6 +31,7 @@
 #include <err.h>
 #include <string.h>
 #include <poll.h>
+#include <time.h>
 
 #include <host_nmea2000.h>
 #include <nmea2000_pgn.h>
@@ -50,12 +51,44 @@ const struct nmea2000_user_param n2k_param = {
 uint32_t watch_userid = 0;
 uint32_t watch_address = 0;
 int printf_msg_count = -1;
+int is_newline = 1;
+
+struct timeval start_tv;
+
+typedef enum {
+	TST_NONE,
+	TST_ABS,
+	TST_REL,
+} tst_type_t;
+static tst_type_t tst_type = TST_NONE;
 
 static void
 usage()
 {
-        fprintf(stderr, "usage: n2k_printf <interface> <devid>\n");
+        fprintf(stderr, "usage: n2k_printf [-r|-t] <interface> <devid>\n");
 	exit(1); 
+}
+
+static void
+print_timestamp()
+{
+	char buf[40];
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	switch(tst_type) {
+	case TST_NONE:
+		return;
+	case TST_ABS:
+		strftime(buf, sizeof(buf), "%F %H:%M:%S",
+		    localtime(&tv.tv_sec));
+		printf("%s.%06d ", buf, tv.tv_usec);
+		return;
+	case TST_REL:
+		timersub(&tv, &start_tv, &tv);
+		printf("%6d.%06d ", tv.tv_sec, tv.tv_usec);
+		return;
+	}
 }
 
 void
@@ -70,6 +103,9 @@ user_receive(struct nmea2000_msg *msg)
 			rid |= msg->n2k_data[1] << 8;
 			rid |= (msg->n2k_data[2] & 0x1f) << 16;
 			if (rid == watch_userid) {
+				if (!is_newline)
+					printf("\n");
+				print_timestamp();
 				printf("found device 0x%x at address %d\n",
 				    rid, msg->n2k_id.saddr);
 				watch_address = msg->n2k_id.saddr;
@@ -86,6 +122,9 @@ user_receive(struct nmea2000_msg *msg)
 				rid |= ctrl->control_data[1] << 8;
 				rid |= (ctrl->control_data[2] & 0x1f) << 16;
 				if (rid == watch_userid) {
+					if (!is_newline)
+						printf("\n");
+					print_timestamp();
 					printf("adv device 0x%x at address %d\n",
 					    rid, msg->n2k_id.saddr);
 					watch_address = msg->n2k_id.saddr;
@@ -97,8 +136,14 @@ user_receive(struct nmea2000_msg *msg)
 		case (PRIVATE_PRINTF_DATA >> 8):
 			if (msg->n2k_id.saddr != watch_address)
 				return;
+				
 			for (int i = 0; i < msg->n2k_dlc; i++) {
+				if (is_newline)
+					print_timestamp();
+				is_newline = 0;
 				putchar(msg->n2k_data[i]);
+				if (msg->n2k_data[i] == '\n')
+					is_newline = 1;
 			}
 			if (printf_msg_count > 0)
 				printf_msg_count--;
@@ -164,18 +209,32 @@ send_printf_request()
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char * const argv[])
 {
+	int ch;
 	uint8_t prev_addr;
-	if (argc != 3)
+
+	while ((ch = getopt(argc, argv, "rt")) != -1) {
+		switch(ch) {
+		case 'r':
+			tst_type = TST_REL;
+			break;
+		case 't':
+			tst_type = TST_ABS;
+			break;
+		}
+	}
+	argc -= optind;
+	argv += optind;
+
+	if (argc != 2) {
 		usage();
+	}
 
-	watch_userid = strtol(argv[2], NULL, 0);
+	watch_userid = strtol(argv[1], NULL, 0);
 
-	if ((nmea2000_socket = nmea2000_init(&n2k_param, argv[1])) < 0)
+	if ((nmea2000_socket = nmea2000_init(&n2k_param, argv[0])) < 0)
 		err(1, "nmea2000_init");
-
-	prev_addr = nmea2000_addr;
 
 	nmea2000_poll(); /* start address claim */
 
@@ -188,10 +247,17 @@ main(int argc, const char *argv[])
 
 	while ((ret = poll(&fds, 1, 500)) >= 0) {
 		nmea2000_poll();
+		fds.revents = 0;
 		if (nmea2000_status == NMEA2000_S_OK)
 			break;
-		
-		fds.revents = 0;
+	}
+	prev_addr = nmea2000_addr;
+	gettimeofday(&start_tv, NULL);
+	if (tst_type == TST_REL) {
+		char buf[40];
+		strftime(buf, sizeof(buf), "%F %H:%M:%S",
+		    localtime(&start_tv.tv_sec));
+		printf("%s.%06d start\n", buf, start_tv.tv_usec);
 	}
 
 	/* request the device address */
@@ -200,6 +266,11 @@ main(int argc, const char *argv[])
 	/* and start handing incoming packets */
 	while ((ret = poll(&fds, 1, 500)) >= 0) {
 		nmea2000_poll();
+		if (prev_addr != nmea2000_addr) {
+			prev_addr = nmea2000_addr;
+			/* redirect printf packets to new address */
+			printf_msg_count = 0;
+		}
 		if (printf_msg_count == 0)
 			send_printf_request();
 	}
