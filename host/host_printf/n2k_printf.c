@@ -171,7 +171,7 @@ send_iso_request()
 	msg.n2k_id.priority = NMEA2000_PRIORITY_CONTROL;
 	msg.n2k_id.iso_pg = (ISO_REQUEST >> 8);
 	msg.n2k_id.saddr = nmea2000_addr;
-	msg.n2k_id.daddr = NMEA2000_ADDR_NULL;
+	msg.n2k_id.daddr = NMEA2000_ADDR_GLOBAL;
 	data[0] = (ISO_ADDRESS_CLAIM >> 16);
 	data[1] = (ISO_ADDRESS_CLAIM >>  8);
 	data[2] = (ISO_ADDRESS_CLAIM & 0xff);
