@@ -41,8 +41,8 @@ const struct nmea2000_user_param n2k_param = {
 	.n2kuser_id = 0x18748,
 	.n2kuser_manuf = 0x7fe,
 	.n2kuser_device_instance = 0,
-	.n2kuser_device_function = 142,
-	.n2kuser_device_class = 35,
+	.n2kuser_device_function = 130,
+	.n2kuser_device_class = 10,
 	.n2kuser_industry_group = 4,
 	.n2kuser_system_instance = 0,
 };
