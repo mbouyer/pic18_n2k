@@ -103,11 +103,14 @@ user_receive(struct nmea2000_msg *msg)
 			rid |= msg->n2k_data[1] << 8;
 			rid |= (msg->n2k_data[2] & 0x1f) << 16;
 			if (rid == watch_userid) {
-				if (!is_newline)
+				if (!is_newline) {
 					printf("\n");
+					fflush(stdout);
+				}
 				print_timestamp();
 				printf("found device 0x%x at address %d\n",
 				    rid, msg->n2k_id.saddr);
+				fflush(stdout);
 				watch_address = msg->n2k_id.saddr;
 				printf_msg_count = 0;
 				return;
@@ -122,11 +125,14 @@ user_receive(struct nmea2000_msg *msg)
 				rid |= ctrl->control_data[1] << 8;
 				rid |= (ctrl->control_data[2] & 0x1f) << 16;
 				if (rid == watch_userid) {
-					if (!is_newline)
+					if (!is_newline) {
 						printf("\n");
+						fflush(stdout);
+					}
 					print_timestamp();
 					printf("adv device 0x%x at address %d\n",
 					    rid, msg->n2k_id.saddr);
+					fflush(stdout);
 					watch_address = msg->n2k_id.saddr;
 					printf_msg_count = 0;
 					return;
@@ -142,8 +148,10 @@ user_receive(struct nmea2000_msg *msg)
 					print_timestamp();
 				is_newline = 0;
 				putchar(msg->n2k_data[i]);
-				if (msg->n2k_data[i] == '\n')
+				if (msg->n2k_data[i] == '\n') {
 					is_newline = 1;
+					fflush(stdout);
+				}
 			}
 			if (printf_msg_count > 0)
 				printf_msg_count--;
@@ -258,6 +266,7 @@ main(int argc, char * const argv[])
 		strftime(buf, sizeof(buf), "%F %H:%M:%S",
 		    localtime(&start_tv.tv_sec));
 		printf("%s.%06d start\n", buf, start_tv.tv_usec);
+		fflush(stdout);
 	}
 
 	/* request the device address */
